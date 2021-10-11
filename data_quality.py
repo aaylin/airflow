@@ -7,7 +7,7 @@ from airflow.utils.decorators import apply_defaults
 class DataQualityOperator(BaseOperator):
     """
     quality check operator for data quality checks of the Redshift data
-    :param redshift_conn_id: Connection id for the Connection to Redshift
+    :param conn_id: Connection id for the Connection to Redshift
     :param quality_queries: Data quality check queries
     :param expected_results: expressions to validate the data quality query results
     """
@@ -26,7 +26,7 @@ class DataQualityOperator(BaseOperator):
         self.expected_results = expected_results
 
     def execute(self, context):
-        redshift_hook = PostgresHook(self.redshift_conn_id)
+        redshift = PostgresHook(postgres_conn_id=self.id_conn)
 
         for i, query in enumerate(self.quality_queries):
             self.log.info(f"Running quality check {i}: {query}")
@@ -35,6 +35,6 @@ class DataQualityOperator(BaseOperator):
             if len(records) < 1 or len(records[0]) < 1:
                 raise ValueError(f"Quality check failed. No results returned by {query}.")
             num_records = records[0][0]
-            if not self.expected[i](num_records) < 1:
-                raise ValueError(f"Quality check failed. Expected value does not fit to returned       value of {num_records}")
+            if not self.expected_results[i](num_records) < 1:
+                raise ValueError(f"Quality check failed. Expected value does not fit to returned value of {num_records}")
         logging.info(f"Data quality on {query} passed with {records[0][0]} records")
