@@ -44,8 +44,8 @@ stage_events_to_redshift = StageToRedshiftOperator(
     table='public.staging_events',
     s3_bucket='udacity-dend',
     s3_key='log_data',
+    jsonpath='s3://udacity-dend/log_json_path.json'
 )
-
 
 stage_songs_to_redshift = StageToRedshiftOperator(
     task_id='Stage_songs',
@@ -110,15 +110,15 @@ load_time_dimension_table = LoadDimensionOperator(
 
 """ DAG for quality checks """
 run_quality_checks = DataQualityOperator(
-       task_id='Run_data_quality_checks',
+    task_id='Run_data_quality_checks',
     dag=dag,
     id_conn="redshift",
     quality_queries=["SELECT COUNT(*) FROM songs WHERE songid IS NULL", \
-                       "SELECT COUNT(*) FROM songs", \
-                       "SELECT COUNT(*) FROM songplays", \
-                       "SELECT COUNT(*) FROM artists", \
-                       "SELECT COUNT(*) FROM artists", \
-                       "SELECT COUNT(*) FROM time" \
+                     "SELECT COUNT(*) FROM songs", \
+                     "SELECT COUNT(*) FROM songplays", \
+                     "SELECT COUNT(*) FROM artists", \
+                     "SELECT COUNT(*) FROM artists", \
+                     "SELECT COUNT(*) FROM time" \
                       ],
     expected_results=[lambda num_records: num_records==0, \
                       lambda num_records: num_records>0, \
