@@ -1,8 +1,6 @@
 class SqlQueries:
     songplay_table_insert = ("""
-        SELECT
-                md5(events.sessionid || events.start_time) songplay_id,
-                events.start_time, 
+        SELECT DISTINCT TIMESTAMP 'epoch' + (ts / 1000) * INTERVAL '1 second' as start_time,
                 events.userid, 
                 events.level, 
                 songs.song_id, 
@@ -19,13 +17,11 @@ class SqlQueries:
                 AND events.length = songs.duration
     """)
 
-    """ query to show up """
-    
     user_table_insert = ("""
         WITH numbered_levels AS (
       SELECT ROW_NUMBER() over (PARTITION by userid ORDER BY ts DESC) AS row_num,
              userid,
-             firstname, 
+             firstname,
              lastname, 
              gender, 
              level
